@@ -1,5 +1,5 @@
 # AWS Load Balancer Controller: turns every Ingress with class "alb" into rules on ONE
-# internal ALB (group astra-internal). Wave 1: before any add-on that has an Ingress.
+# internal ALB (group astra-internal). Wave 3: before any add-on that has an Ingress.
 # Sync waves order only what the root app "platform" applies (these ApplicationSets). The Applications
 # they generate converge on their own: retry with backoff, plus SkipDryRunOnMissingResource where a CRD
 # comes from another app.
@@ -9,7 +9,7 @@ metadata:
   name: aws-load-balancer-controller
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
@@ -24,7 +24,7 @@ spec:
     metadata:
       name: aws-load-balancer-controller
       annotations:
-        argocd.argoproj.io/sync-wave: "1"
+        argocd.argoproj.io/sync-wave: "3"
     spec:
       project: default
       source:

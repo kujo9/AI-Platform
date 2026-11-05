@@ -7,6 +7,8 @@ kind: ApplicationSet
 metadata:
   name: gateway
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"   # after every add-on (waves 0 to 6)
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]

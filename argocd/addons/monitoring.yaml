@@ -1,7 +1,7 @@
 # Monitoring, in three steps:
-#   wave 2  monitoring-config      Grafana admin Secret + the Astra dashboard (platform/monitoring)
-#   wave 3  kube-prometheus-stack  Prometheus, Grafana, Alertmanager, node and cluster metrics
-#   wave 4  dcgm-exporter          GPU metrics (needs the ServiceMonitor CRD from wave 3)
+#   wave 4  monitoring-config      Grafana admin Secret + the Astra dashboard (platform/monitoring)
+#   wave 5  kube-prometheus-stack  Prometheus, Grafana, Alertmanager, node and cluster metrics
+#   wave 6  dcgm-exporter          GPU metrics (needs the ServiceMonitor CRD from wave 5)
 # Sync waves order only what the root app "platform" applies (these ApplicationSets). The Applications
 # they generate converge on their own: retry with backoff, plus SkipDryRunOnMissingResource where a CRD
 # comes from another app.
@@ -11,7 +11,7 @@ metadata:
   name: monitoring-config
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
@@ -26,7 +26,7 @@ spec:
     metadata:
       name: monitoring-config
       annotations:
-        argocd.argoproj.io/sync-wave: "2"
+        argocd.argoproj.io/sync-wave: "4"
     spec:
       project: default
       source:
@@ -49,7 +49,7 @@ metadata:
   name: kube-prometheus-stack
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
@@ -64,7 +64,7 @@ spec:
     metadata:
       name: kube-prometheus-stack
       annotations:
-        argocd.argoproj.io/sync-wave: "3"
+        argocd.argoproj.io/sync-wave: "5"
     spec:
       project: default
       source:
@@ -160,7 +160,7 @@ metadata:
   name: dcgm-exporter
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-wave: "6"
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
@@ -175,7 +175,7 @@ spec:
     metadata:
       name: dcgm-exporter
       annotations:
-        argocd.argoproj.io/sync-wave: "4"
+        argocd.argoproj.io/sync-wave: "6"
     spec:
       project: default
       source:

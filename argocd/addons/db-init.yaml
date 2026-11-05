@@ -1,5 +1,5 @@
 # db-init Job (platform/db-init): makes the litellm user and database on RDS.
-# Wave 4: after External Secrets (wave 0-1). LiteLLM finds its database ready.
+# Wave 6: after External Secrets (wave 2-3). LiteLLM finds its database ready.
 # Gated on enable_db_init (Terraform variable addons).
 # Sync waves order only what the root app "platform" applies (these ApplicationSets). The Applications
 # they generate converge on their own: retry with backoff, plus SkipDryRunOnMissingResource where a CRD
@@ -10,7 +10,7 @@ metadata:
   name: db-init
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-wave: "6"
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
@@ -25,7 +25,7 @@ spec:
     metadata:
       name: db-init
       annotations:
-        argocd.argoproj.io/sync-wave: "4"
+        argocd.argoproj.io/sync-wave: "6"
     spec:
       project: default
       source:

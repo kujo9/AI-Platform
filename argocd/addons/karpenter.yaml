@@ -1,6 +1,6 @@
 # Karpenter NodePools and EC2NodeClasses (platform/karpenter).
 # Terraform installs the Karpenter controller itself (on the system nodes); this only says
-# WHICH machines it may start. Wave 0: GPU and extra nodes are needed by later add-ons.
+# WHICH machines it may start. Wave 2: GPU and extra nodes are needed by later add-ons.
 # Sync waves order only what the root app "platform" applies (these ApplicationSets). The Applications
 # they generate converge on their own: retry with backoff, plus SkipDryRunOnMissingResource where a CRD
 # comes from another app.
@@ -10,7 +10,7 @@ metadata:
   name: karpenter-nodepools
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true   # deleting the ApplicationSet does not delete the NodePools
@@ -25,7 +25,7 @@ spec:
     metadata:
       name: karpenter-nodepools
       annotations:
-        argocd.argoproj.io/sync-wave: "0"
+        argocd.argoproj.io/sync-wave: "2"
     spec:
       project: default
       source:

@@ -1,5 +1,5 @@
 # ExternalDNS: writes a Route 53 record for every Ingress host (grafana.<domain>, ...).
-# Wave 2: after the load balancer controller, which gives the Ingress its ALB address.
+# Wave 4: after the load balancer controller, which gives the Ingress its ALB address.
 # Sync waves order only what the root app "platform" applies (these ApplicationSets). The Applications
 # they generate converge on their own: retry with backoff, plus SkipDryRunOnMissingResource where a CRD
 # comes from another app.
@@ -9,7 +9,7 @@ metadata:
   name: external-dns
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
@@ -24,7 +24,7 @@ spec:
     metadata:
       name: external-dns
       annotations:
-        argocd.argoproj.io/sync-wave: "2"
+        argocd.argoproj.io/sync-wave: "4"
     spec:
       project: default
       source:

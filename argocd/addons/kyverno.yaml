@@ -1,5 +1,5 @@
 # Kyverno: checks every new pod against the rules in platform/policies.
-# Wave 2: the engine. Wave 3: the policies (need the CRDs).
+# Wave 4: the engine. Wave 5: the policies (need the CRDs).
 # Sync waves order only what the root app "platform" applies (these ApplicationSets). The Applications
 # they generate converge on their own: retry with backoff, plus SkipDryRunOnMissingResource where a CRD
 # comes from another app.
@@ -9,7 +9,7 @@ metadata:
   name: kyverno
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
@@ -24,7 +24,7 @@ spec:
     metadata:
       name: kyverno
       annotations:
-        argocd.argoproj.io/sync-wave: "2"
+        argocd.argoproj.io/sync-wave: "4"
         # Kyverno's large CRDs show as OutOfSync with the default diff, though nothing differs.
         # The API server computes the diff instead (Argo CD server-side diff).
         argocd.argoproj.io/compare-options: ServerSideDiff=true
@@ -71,7 +71,7 @@ metadata:
   name: kyverno-policies
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
@@ -86,7 +86,7 @@ spec:
     metadata:
       name: kyverno-policies
       annotations:
-        argocd.argoproj.io/sync-wave: "3"
+        argocd.argoproj.io/sync-wave: "5"
     spec:
       project: default
       source:
