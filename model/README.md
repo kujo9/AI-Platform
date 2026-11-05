@@ -8,7 +8,8 @@ vLLM loads the weights from S3, not from Hugging Face. This folder copies them t
 | `loader/download.py` | downloads that revision, only the allowed file types, and refuses non-safetensors weights |
 | `loader/scan.py` | checks the safetensors headers, runs modelscan, checks the license |
 | `loader/upload.py` | uploads to `s3://astra-models-<account>/<name>/<revision>/`, `SHA256SUMS` last |
-| `job.yaml` | the Kubernetes Job that runs the three scripts inside the cluster |
+| `loader/register.py` | records the version in the MLflow App: a run with the evidence, and a version of the model `qwen3.8-27b` whose source is the S3 folder, alias `candidate` |
+| `job.yaml` | the Kubernetes Job that runs the four scripts inside the cluster |
 | `kustomization.yaml` | puts the scripts and the spec in a ConfigMap for the Job |
 
 ## Run it
@@ -20,7 +21,9 @@ kubectl apply -k model/
 kubectl -n models logs -f job/model-loader
 ```
 
-The last log line is `done: s3://astra-models-<account>/qwen3.8-27b/<revision>/ (<n> files)`.
+The last log line is `registered: qwen3.8-27b version <n> -> s3://astra-models-<account>/qwen3.8-27b/<revision>/ (alias candidate)`.
+
+To see it: `bash scripts/mlflow-ui.sh`, then Models, then `qwen3.8-27b`. The weights stay in S3. MLflow keeps the record of each version (its S3 folder, revision, license, scan result, checksums) and two aliases: `candidate` (loaded, not serving yet) and `champion` (the version that serves; you move it).
 
 ## A new version
 
@@ -34,4 +37,4 @@ kubectl apply -k model/
 
 3. Serve it: change `model.revision` in `serving/values/` (or start a canary: `scripts/canary.sh`).
 
-In a company, a pipeline runs these steps, plus an evaluation on a GPU and a human approval, before any version can serve. The guide explains that pipeline; this folder is its first three steps, run by hand.
+In a company, a pipeline runs these steps, plus an evaluation on a GPU and a human approval, before any version can serve. The guide explains that pipeline; this folder is its first four steps, run by hand.

@@ -10,7 +10,8 @@
 #   bash scripts/canary.sh start <revision>   2. canary release with the new revision, no traffic yet
 #   bash scripts/canary.sh weight 10          3. gateway: main 90, canary 10   (later: 25, 50 ...)
 #   bash scripts/load.sh 200                  4. send test traffic; compare the two in Grafana and MLflow
-#   bash scripts/canary.sh promote            5a. the main release rolls to the new revision; canary removed
+#   bash scripts/canary.sh promote            5a. the main release rolls to the new revision; canary removed;
+#                                                 then move the MLflow alias champion to that version
 #   bash scripts/canary.sh rollback           5b. the main release stays as it is; canary removed
 #
 # Needs git and yq v4 (https://github.com/mikefarah/yq, v4.54.1 checked 2026-10-28).
@@ -134,7 +135,9 @@ promote() {
   unroute
   git commit -q -m "canary: promote revision $rev to the main release"
   done_msg "Argo CD rolls the main release to $rev and removes the canary. Watch:
-  kubectl -n serving get pods -L astra/role,astra/model-revision -w"
+  kubectl -n serving get pods -L astra/role,astra/model-revision -w
+Then, in MLflow (bash scripts/mlflow-ui.sh): Models, qwen3.8-27b, the version with the tag
+revision = $rev: move the alias champion to it."
 }
 
 rollback() {

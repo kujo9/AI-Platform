@@ -1,11 +1,16 @@
-# The model loader: one Kubernetes Job that copies one model version from Hugging Face to S3.
+# The model loader: one Kubernetes Job that copies one model version from Hugging Face to S3
+# and records it in MLflow.
 #   1. download.py  the exact revision in qwen3.8-27b.yaml, only the file types it allows
 #   2. scan.py      safetensors only, valid safetensors headers, modelscan, the license matches
 #   3. upload.py    every file to s3://astra-models-<account>/<name>/<revision>/, the scan report,
 #                   then SHA256SUMS last
-# If that revision is already complete in S3 (SHA256SUMS is there), the Job stops at once.
+#   4. register.py  the model registry in the MLflow App: one run with the evidence, and a version
+#                   of the model qwen3.8-27b whose source is that S3 folder, with the alias candidate
+# If that revision is already complete in S3 (SHA256SUMS is there), the Job only runs step 4,
+# which does nothing if the version is already registered.
 # It runs inside the cluster, so the 31 GB never pass through your laptop, and it uses the
-# model-loader role (EKS Pod Identity): write the models bucket, read astra/hf-token. No keys.
+# model-loader role (EKS Pod Identity): write the models bucket, read astra/hf-token, call the
+# MLflow App and write its bucket. No keys.
 #
 # Start it:   kubectl apply -k model/
 # Watch it:   kubectl -n models logs -f job/model-loader
@@ -51,10 +56,12 @@ spec:
               set -e
               export HOME=/work PATH="/work/.local/bin:$PATH"
               pip install --quiet --user --no-warn-script-location -r /loader/requirements.txt
-              if python /loader/upload.py --spec /loader/model.yaml --check; then exit 0; fi
-              python /loader/download.py --spec /loader/model.yaml --out /work/model
-              python /loader/scan.py     --spec /loader/model.yaml --dir /work/model
-              python /loader/upload.py   --spec /loader/model.yaml --dir /work/model --report /work/modelscan-report.json
+              if ! python /loader/upload.py --spec /loader/model.yaml --check; then
+                python /loader/download.py --spec /loader/model.yaml --out /work/model
+                python /loader/scan.py     --spec /loader/model.yaml --dir /work/model
+                python /loader/upload.py   --spec /loader/model.yaml --dir /work/model --report /work/modelscan-report.json
+              fi
+              python /loader/register.py --spec /loader/model.yaml
           env:
             # Same as region in terraform.tfvars. boto3 needs it to find Secrets Manager and S3.
             - name: AWS_DEFAULT_REGION
@@ -65,6 +72,11 @@ spec:
               value: ""
             - name: HF_HUB_DISABLE_PROGRESS_BARS
               value: "1"               # plain log lines instead of progress bars
+            # register.py finds the MLflow App by this name (Terraform's default name "astra").
+            - name: MLFLOW_APP_NAME
+              value: astra
+            - name: MLFLOW_DISABLE_AGENT_HINT
+              value: "1"               # MLflow prints a hint line at import; keep the log clean
           resources:
             requests: {cpu: "2", memory: 8Gi}
             limits: {memory: 8Gi}

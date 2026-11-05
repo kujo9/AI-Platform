@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Opens the MLflow UI of the SageMaker AI MLflow App (the gateway's traces).
+# Opens the MLflow UI of the SageMaker AI MLflow App: the gateway's traces and the model registry.
 # AWS hosts the UI, so no port-forward is needed. The command makes a sign-in link with your own AWS
 # login: the link works once, within 5 minutes; the browser session it opens lasts 12 hours.
 # In the UI: the workspace "default", then the experiment "astra-gateway", then Traces.
+# Model versions: Models, then qwen3.8-27b. The loader runs: the experiment "astra-model-loader".
 #
 # Run from the repository's main folder:  bash scripts/mlflow-ui.sh
 set -euo pipefail

@@ -12,6 +12,7 @@ configMapGenerator:
       - loader/download.py
       - loader/scan.py
       - loader/upload.py
+      - loader/register.py
       - loader/requirements.txt
 generatorOptions:
   disableNameSuffixHash: true   # a fixed name, so job.yaml can point at it

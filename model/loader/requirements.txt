@@ -4,3 +4,7 @@ boto3==1.43.120
 huggingface_hub==2.3.0
 modelscan==0.8.8
 PyYAML==6.0.3
+# register.py: the MLflow client and AWS's plugin that signs calls to the MLflow App with the pod's role.
+# The same versions as the gateway image (gateway/litellm/image/Dockerfile), checked 2026-11-04.
+mlflow-skinny==3.18.0
+sagemaker-mlflow==0.5.0

@@ -23,14 +23,28 @@ locals {
   # namespace / service account => S3 access per bucket, plus any extra statements.
   workloads = {
     model-loader = {
-      # The Job in model/ that copies the model from Hugging Face to the models bucket.
+      # The Job in model/ that copies the model from Hugging Face to the models bucket,
+      # then records it in the MLflow App (the model registry).
       namespace = "models"
-      s3        = { models = local.s3_write }
+      # mlflow: the MLflow client writes the run's evidence files straight to the MLflow bucket.
+      s3 = { models = local.s3_write, mlflow = local.s3_write }
       extra = [
         {
           sid       = "ReadHfToken"
           actions   = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
           resources = [aws_secretsmanager_secret.student["hf-token"].arn]
+        },
+        {
+          # register.py finds the App by its name. A list call cannot be limited to one resource.
+          sid       = "FindMlflowApp"
+          actions   = ["sagemaker:ListMlflowApps"]
+          resources = ["*"]
+        },
+        {
+          # The run and the model version in the MLflow App (the sagemaker-mlflow plugin signs with this role).
+          sid       = "RegisterModel"
+          actions   = ["sagemaker:CallMlflowAppApi"]
+          resources = [aws_sagemaker_mlflow_app.this.arn]
         },
       ]
     }

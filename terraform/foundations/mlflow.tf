@@ -1,12 +1,13 @@
 # MLflow on Amazon SageMaker AI: a serverless MLflow App, named `astra`, in your own AWS account.
 # The gateway (LiteLLM) sends one trace per request to it: the request, the answer and what LiteLLM
-# adds, plus a tag team:<name> (gateway/sync_teams.py sets it). The traces never leave your account. The same App can also be the
-# model registry of a company pipeline (05-model-pipeline explains it).
+# adds, plus a tag team:<name> (gateway/sync_teams.py sets it). The traces never leave your account.
+# The same App is the model registry: the loader Job (model/) registers each model version it copies
+# to S3, as a version of the model qwen3.8-27b whose source is the S3 folder.
 # AWS runs the server and its metadata database. We own only the artifact bucket and one role.
 #
 # Clients use the app ARN as MLFLOW_TRACKING_URI. The sagemaker-mlflow plugin (in the gateway image,
 # gateway/litellm/image) signs every call with the caller's own AWS credentials, so access is plain IAM:
-# sagemaker:CallMlflowAppApi on this ARN (pod-identity.tf gives it to the gateway).
+# sagemaker:CallMlflowAppApi on this ARN (pod-identity.tf gives it to the gateway and the model loader).
 
 # The app's own role. SageMaker uses it for as long as the app exists, to read and write the artifacts.
 resource "aws_iam_role" "mlflow_app" {
