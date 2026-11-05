@@ -15,12 +15,12 @@ module "eks" {
 
   # EKS already encrypts all Kubernetes API data (Secrets included) with an AWS owned key, at no cost
   # (Kubernetes 1.28 and later). So no customer managed KMS key: nothing to pay for, and nothing that
-  # waits 7-30 days to be deleted after terraform destroy. A company that must hold its own key sets one.
+  # waits 7-30 days to be deleted after terraform destroy. Production may set its own key (10-production).
   create_kms_key    = false
   encryption_config = null
 
   # Control-plane logs in CloudWatch: only the audit log (who did what in the cluster), kept 7 days.
-  # Lab setting. Production keeps api, audit and authenticator, for as long as the company's rules say.
+  # Lab setting. Production keeps api, audit and authenticator, for as long as your retention rules say.
   enabled_log_types                      = ["audit"]
   cloudwatch_log_group_retention_in_days = 7
 

@@ -4,9 +4,10 @@
 # share step by step while you compare it with the main release, then promote it or roll it back.
 #
 # Every step changes files and makes a Git commit. You push it; Argo CD applies what Git says.
-# (In a company, each push is a pull request that someone reviews.)
+# (In production, each push is a pull request that someone reviews: 10-production.)
 #
 #   1. load the new revision into S3 first:   change revision in model/qwen3.8-27b.yaml, run the Job in model/
+#      then each role approves it:          bash scripts/approve.sh <revision> <role> "<name>"
 #   bash scripts/canary.sh start <revision>   2. canary release with the new revision, no traffic yet
 #   bash scripts/canary.sh weight 10          3. gateway: main 90, canary 10   (later: 25, 50 ...)
 #   bash scripts/load.sh 200                  4. send test traffic; compare the two in Grafana and MLflow
@@ -50,6 +51,9 @@ start() {
   cur=$(yq '.model.revision' "$MAIN_VALUES")
   [ "$rev" != "$cur" ] || { echo "The main release already serves $rev."; exit 1; }
   clean_tree
+
+  # Every role in model/approvals.yaml must have approved this revision (scripts/approve.sh).
+  bash scripts/check-approval.sh "$rev" || { echo "canary.sh: no canary before every approval is in."; exit 1; }
 
   # The new revision must be in S3 (the loader writes SHA256SUMS last), and it must hold other files.
   # Two Hugging Face commits can have the same weights (a commit that only changes the README);
@@ -154,5 +158,5 @@ case "${1:-}" in
   weight) weight "${2:-}" ;;
   promote) promote ;;
   rollback) rollback ;;
-  *) sed -n '2,16p' "$0"; exit 1 ;;
+  *) sed -n '2,17p' "$0"; exit 1 ;;
 esac

@@ -17,7 +17,7 @@ resource "aws_bedrock_guardrail" "this" {
     }
   }
 
-  # One denied topic, to show the feature. A company adds its own list here.
+  # One denied topic, to show the feature. Add your own denied topics here.
   topic_policy_config {
     topics_config {
       name       = "investment-advice"

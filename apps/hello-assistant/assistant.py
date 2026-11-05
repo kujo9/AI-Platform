@@ -1,4 +1,4 @@
-"""A very small chat assistant that calls Astra, the company's own model, through the gateway.
+"""A very small chat assistant that calls Astra, our own model, through the gateway.
 
 It is the shortest real app: the OpenAI SDK, a base URL, a team API key and the model name "astra".
 The model itself runs on your GPU nodes; the gateway checks the key and the budget, masks personal

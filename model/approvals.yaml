@@ -1,0 +1,7 @@
+# Who must approve a model version before it serves. scripts/check-approval.sh reads this list.
+# Every company has its own approvers: change the roles to yours, then commit and push.
+# Record an approval:  bash scripts/approve.sh <revision> <role> "<your name>"
+required:
+  - security      # the source, the scan results, the file formats
+  - legal         # the licence and the use terms
+  - model-owner   # the test results
