@@ -1,0 +1,51 @@
+# The k8s-assistant app in namespace "k8s-assistant".
+# Argo CD applies this file because it is under argocd/ (the root app reads that folder).
+# An ApplicationSet with the cluster generator makes one Application "k8s-assistant". It fills the
+# repository, the gateway's domain and the ECR image repository from the cluster Secret Terraform
+# made (GitOps Bridge). The image tag is set below, under kustomize.images.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: k8s-assistant
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            argocd.argoproj.io/secret-type: cluster
+            enable_k8s_assistant: "true"     # turned on by the Terraform variable apps (terraform.tfvars)
+  template:
+    metadata:
+      name: k8s-assistant
+    spec:
+      project: default
+      source:
+        repoURL: '{{ .metadata.annotations.repo_url }}'
+        targetRevision: '{{ .metadata.annotations.repo_revision }}'
+        path: apps/k8s-assistant/deploy
+        kustomize:
+          images:
+            # The image to run: the ECR repository Terraform made, and the tag you pushed.
+            # Deploying a new version = docker push with a new tag, then change the tag here and git push.
+            - 'k8s-assistant={{ .metadata.annotations.app_image_repo }}:0.1.0'
+          patches:
+            # The gateway URL depends on the domain, so it is set here and not in Git.
+            - target:
+                kind: ConfigMap
+                name: k8s-assistant
+              patch: |-
+                - op: replace
+                  path: /data/OPENAI_BASE_URL
+                  value: https://astra.{{ .metadata.annotations.domain }}/v1
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: k8s-assistant
+      syncPolicy:
+        automated:
+          prune: true     # a manifest removed from Git is removed from the cluster
+          selfHeal: true  # a manual change in the cluster is put back to what Git says
+        syncOptions:
+          - CreateNamespace=true

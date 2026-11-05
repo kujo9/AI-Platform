@@ -1,0 +1,21 @@
+build/
+*.bak
+
+# Terraform: local cache, state, your values, saved plans, the generated backend file
+**/.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+tfplan
+terraform/foundations/backend.hcl
+
+# Python
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Local secrets
+.env
+*.pem
+.teardown-versions.json
